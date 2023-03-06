@@ -1,5 +1,4 @@
 import streamlit as st
-from temp_app import temperature
 import numpy as np
 from pathlib import Path
 import joblib as jbl
@@ -42,8 +41,8 @@ def predict_form():
             season = 2 # rainy
         if submit := st.form_submit_button("Predict"):
             inputs = np.array([T1, T2, H1, H2, season])
-            temp = temp_data['temp_y_scalar'].inverse_transform(predict(inputs, "models/temperature_Metadata_N_12_P_11_bs_32.jbl", "models/temperature_RBF_ANN_model_bs_32_N_12_P_11.h5"))
-            humidity = humidity_data['humidity_y_scalar'].inverse_transform(predict(inputs, "models/humidity_Metadata_N_12_P_10_bs_128.jbl", "models/humidity_RBF_ANN_model_bs_128_N_12_P_10.h5"))
+            temp = temp_data['temp_y_scalar'].inverse_transform(predict(inputs, "temperature_Metadata_N_12_P_11_bs_32.jbl", "temperature_RBF_ANN_model_bs_32_N_12_P_11.h5"))
+            humidity = humidity_data['humidity_y_scalar'].inverse_transform(predict(inputs, "humidity_Metadata_N_12_P_10_bs_128.jbl", "humidity_RBF_ANN_model_bs_128_N_12_P_10.h5"))
             st.write(f"#### Predicted Temperature: {((temp[0][0] - 32)*5)/9:.1f} °C")
             st.write(f"#### Predicted Humidity: {humidity[0][0]:.1f} %")
 
@@ -92,7 +91,6 @@ header_html = f'<img src="data:image/png;base64,{img_to_bytes("logos.png")}" cla
 st.sidebar.markdown(
     header_html, unsafe_allow_html=True,
 )
-
 
 st.sidebar.write("#\n#\n#")
 st.sidebar.markdown("**Disclaimer:** This project is associated with the [Center for Artificial Intelligence and Deep Learning (CAIDL)](https://sru.edu.in/centers/caidl/) at [SR University](https://sru.edu.in).")
