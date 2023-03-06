@@ -1,0 +1,85 @@
+import streamlit as st
+from temp_app import temperature
+import numpy as np
+from pathlib import Path
+import joblib as jbl
+from predict import predict
+from PIL import Image
+import base64
+
+
+st.set_page_config(page_title='RBF NN Humidity and Temperature', page_icon='⚡️', layout="wide", initial_sidebar_state="expanded", menu_items=None, )
+
+col1, icol2, icol3 = st.columns([1,6,1])
+
+with col1:
+    st.write("")
+with icol2:
+    banner = st.image(Image.open('transco.jpeg'), use_column_width='auto', output_format='png')
+with icol3:
+    st.write("")
+
+st.markdown("""
+<div style="text-align:center"><h4>Electric Power Load Prediction on a 33/11 KV Substation
+<p>(Godishala, Saidapur, Telangana, India)</p></div>
+""", unsafe_allow_html=True)
+
+temp_data = jbl.load('models/all_temp_data.joblib')
+humidity_data = jbl.load('models/all_humidity_data.joblib')
+
+choice = ['Predict']
+param = st.sidebar.selectbox("Select any of the options below", choice)
+title = st.write(
+    "## RBF Neural Network Web App for Temperature and Humidity Prediction"
+)
+
+if param == 'Predict':
+    with st.sidebar:
+            st.markdown("""
+                        ---
+                        **Inputs:**
+                        - Temperature (T-1) (°C)  
+                        - Temperature (T-2) (°C)  
+                        - Humidity (T-1) (%)  
+                        - Humidity (T-2) (%)  
+                        - Season (Winter, Summer, Rainy)  
+                        ---
+                        **Outputs:**
+                        - Temperature (°C)
+                        - Humidity (%)
+                        ---
+                        """)
+
+    with st.form("Temperature and Humidity Form"):
+        col1, col2 = st.columns(2)
+        with col1:
+            T1 = st.number_input("Temperature (T-1) (°C)", min_value=0.0, max_value=100.0, value=32.0, step=0.1)
+            H1 = st.number_input("Humidity (T-1) (%)", min_value=0.0, max_value=100.0, value=97.0, step=0.1)
+            T1 = (T1 * 9/5) + 32
+        with col2:
+            T2 = st.number_input("Temperature (T-2) (°C)", min_value=0.0, max_value=50.0, value=33.0, step=0.1)
+            T2 = (T2 * 9/5) + 32
+            H2 = st.number_input("Humidity (T-2) (%)", min_value=0.0, max_value=100.0, value=98.0, step=0.1)
+        season = st.selectbox("Season", ["Winter", "Summer", "Rainy"])
+        if season == "Winter":
+            season = 0
+        elif season == "Summer":
+            season = 1
+        else:
+            season = 2 # rainy
+        if submit := st.form_submit_button("Predict"):
+            inputs = np.array([T1, T2, H1, H2, season])
+            temp = temp_data['temp_y_scalar'].inverse_transform(predict(inputs, "models/temperature_Metadata_N_12_P_11_bs_32.jbl", "models/temperature_RBF_ANN_model_bs_32_N_12_P_11.h5"))
+            humidity = humidity_data['humidity_y_scalar'].inverse_transform(predict(inputs, "models/humidity_Metadata_N_12_P_10_bs_128.jbl", "models/humidity_RBF_ANN_model_bs_128_N_12_P_10.h5"))
+            st.write(f"### Predicted Temperature: {((temp[0][0] - 32)*5)/9:.1f} °C")
+            st.write(f"### Predicted Humidity: {humidity[0][0]:.1f} %")
+    
+
+def img_to_bytes(img_path):
+    img_bytes = Path(img_path).read_bytes()
+    return base64.b64encode(img_bytes).decode()
+
+header_html = f'<img src="data:image/png;base64,{img_to_bytes("logos.png")}" class="img-fluid" width="300" height="170">'
+st.sidebar.markdown(
+    header_html, unsafe_allow_html=True,
+)
