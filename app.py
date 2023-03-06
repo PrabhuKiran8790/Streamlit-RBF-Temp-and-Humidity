@@ -41,13 +41,13 @@ def predict_form():
             season = 2 # rainy
         if submit := st.form_submit_button("Predict"):
             inputs = np.array([T1, T2, H1, H2, season])
-            temp = temp_data['temp_y_scalar'].inverse_transform(predict(inputs, "temperature_Metadata_N_12_P_11_bs_32.jbl", "temperature_RBF_ANN_model_bs_32_N_12_P_11.h5"))
-            humidity = humidity_data['humidity_y_scalar'].inverse_transform(predict(inputs, "humidity_Metadata_N_12_P_10_bs_128.jbl", "humidity_RBF_ANN_model_bs_128_N_12_P_10.h5"))
+            temp = predict(inputs, "temperature_Metadata_N_12_P_11_bs_32.jbl", "temperature_RBF_ANN_model_bs_32_N_12_P_11.h5")
+            temp = (108 - 50) * temp + 50
+            humidity = predict(inputs, "humidity_Metadata_N_12_P_10_bs_128.jbl", "humidity_RBF_ANN_model_bs_128_N_12_P_10.h5")
+            humidity = (102 - 14) * humidity + 14
             st.write(f"#### Predicted Temperature: {((temp[0][0] - 32)*5)/9:.1f} °C")
             st.write(f"#### Predicted Humidity: {humidity[0][0]:.1f} %")
 
-temp_data = jbl.load('models/all_temp_data.joblib')
-humidity_data = jbl.load('models/all_humidity_data.joblib')
 
 choice = ['Predict']
 param = st.sidebar.selectbox("Select any of the options below", choice)
