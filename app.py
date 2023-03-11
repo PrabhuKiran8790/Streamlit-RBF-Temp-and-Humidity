@@ -41,10 +41,8 @@ def predict_form():
             season = 2 # rainy
         if submit := st.form_submit_button("Predict"):
             inputs = np.array([T1, T2, H1, H2, season])
-            temp = predict(inputs, "temperature_Metadata_N_12_P_11_bs_32.jbl", "temperature_RBF_ANN_model_bs_32_N_12_P_11.h5")
-            temp = (108 - 50) * temp + 50
-            humidity = predict(inputs, "humidity_Metadata_N_12_P_10_bs_128.jbl", "humidity_RBF_ANN_model_bs_128_N_12_P_10.h5")
-            humidity = (102 - 14) * humidity + 14
+            temp = predict(inputs, 'models/temp_optimal_info.jbl')
+            humidity = predict(inputs, 'models/humidity_optimal_info.jbl')
             st.write(f"#### Predicted Temperature: {((temp[0][0] - 32)*5)/9:.1f} °C")
             st.write(f"#### Predicted Humidity: {humidity[0][0]:.1f} %")
 
