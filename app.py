@@ -14,7 +14,7 @@ def img_to_bytes(img_path):
 
 warangal_html = f'<img src="data:image/png;base64,{img_to_bytes("warangal.png")}" class="img-fluid" width="600" height="290">'
 
-rbf_architecture = Image.open('rbf_architecture.png')
+rbf_architecture = Image.open('rbf_architecture.jpeg')
 
 def warangal(): return st.markdown(
     warangal_html, unsafe_allow_html=True,
